@@ -5,11 +5,12 @@ receivers:
       http:
 
 exporters:
-  jaeger:
-    endpoint: "jaeger:14250"
-    tls:
-      insecure: true
   logging:
+    logLevel: debug
+  otlp/ls:
+    endpoint: ingest.lightstep.com:443
+    headers: 
+      "lightstep-access-token": "<lighstep_access_token>"
 
 processors:
   batch:
@@ -19,4 +20,4 @@ service:
     traces:
       receivers: [otlp]
       processors: [batch]
-      exporters: [logging, jaeger]
+      exporters: [logging, otlp/ls]
