@@ -10,7 +10,7 @@ exporters:
   otlp/ls:
     endpoint: ingest.lightstep.com:443
     headers: 
-      "lightstep-access-token": "<lighstep_access_token>"
+      "lightstep-access-token": "${LIGHTSTEP_ACCESS_TOKEN}"
 
 processors:
   batch:
