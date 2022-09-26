@@ -1,2 +1,31 @@
 # extra settings to be merged into OpenTelemetry Collector configuration
 # do not delete this file
+receivers:
+  otlp:
+    protocols:
+      grpc:
+      http:
+
+exporters:
+  otlp/ls:
+    endpoint: "ingest.lightstep.com:443"
+    headers:
+      "lightstep-access-token": <lightstep_access_token>
+  logging:
+  prometheus:
+    endpoint: "otelcol:9464"
+
+
+processors:
+  batch:
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [logging, otlp/ls]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [prometheus, logging, otlp/ls]
