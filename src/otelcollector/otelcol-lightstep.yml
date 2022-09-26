@@ -12,7 +12,7 @@ exporters:
   otlp/ls:
     endpoint: "ingest.lightstep.com:443"
     headers:
-      "lightstep-access-token": vtQzTPVPQ7tr3nVTTPIVSMF5t6f+dbl3G6Ij2FVDF13hi0cXICjm6VqvLymZxYwFQlEZ40L0+QnmBc3FcG9nI3ZOGJwK9g9pkzTOYC6z
+      "lightstep-access-token": <lightstep_access_token>
   logging:
   prometheus:
     endpoint: "otelcol:9464"
