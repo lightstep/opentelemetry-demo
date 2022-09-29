@@ -56,10 +56,10 @@ class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
 
 
 def get_product_list(request_product_ids):
-    with tracer.start_as_current_span("get_product_list") as span:
+    with tracer.start_as_current_span("get_product_list") as span:        
         max_responses = 5
         # fetch list of products from product catalog stub
-        cat_response = product_catalog_stub.ListProducts(demo_pb2.Empty())
+        cat_response = product_catalog_stub.ListProducts(demo_pb2.Empty())        
         product_ids = [x.id for x in cat_response.products]
         span.set_attribute("app.products.count", len(product_ids))
 
@@ -72,6 +72,7 @@ def get_product_list(request_product_ids):
         indices = random.sample(range(num_products), num_return)
         # fetch product ids from indices
         prod_list = [filtered_products[i] for i in indices]
+        span.set_attribute("app.filtered_products.list", prod_list)
         return prod_list
 
 
@@ -83,14 +84,11 @@ def must_map_env(key: str):
 
 if __name__ == "__main__":
     logger = getJSONLogger('recommendationservice-server')
-    tracer_provider = TracerProvider()
-    trace.set_tracer_provider(tracer_provider)
-    tracer_provider.add_span_processor(BatchSpanProcessor(OTLPSpanExporter()))
-    tracer = trace.get_tracer("recommendationservice")
+    tracer = trace.get_tracer_provider().get_tracer("recommendationservice")
 
     port = must_map_env('RECOMMENDATION_SERVICE_PORT')
     catalog_addr = must_map_env('PRODUCT_CATALOG_SERVICE_ADDR')
-
+    
     channel = grpc.insecure_channel(catalog_addr)
     product_catalog_stub = demo_pb2_grpc.ProductCatalogServiceStub(channel)
 
