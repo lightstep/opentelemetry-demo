@@ -3,10 +3,10 @@ receivers:
     protocols:
       grpc:
       http:
-  otlp/spanmetrics:
-    protocols:
-      grpc:
-        endpoint: "localhost:65535"
+  # otlp/spanmetrics:
+  #   protocols:
+  #     grpc:
+  #       endpoint: "localhost:65535"
 
 
 exporters:
@@ -30,6 +30,6 @@ service:
       receivers: [otlp]
       processors: [batch]
       exporters: [logging, otlp/ls]
-    metrics/spanmetrics:
-      receivers: [ otlp/spanmetrics ]
-      exporters: [ prometheus, logging ]
+    # metrics/spanmetrics:
+    #   receivers: [ otlp/spanmetrics ]
+    #   exporters: [ prometheus, logging ]
