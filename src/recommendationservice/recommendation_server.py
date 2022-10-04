@@ -17,15 +17,30 @@
 # Python
 import os
 import random
+from typing import Iterable
 import time
 from concurrent import futures
 
 # Pip
 import grpc
 from opentelemetry import trace
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import (BatchSpanProcessor)
-from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+
+from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import (
+    OTLPMetricExporter,
+)
+from opentelemetry.metrics import (
+    CallbackOptions,
+    Observation,
+    get_meter_provider,
+    # set_meter_provider,
+)
+# from opentelemetry.sdk.metrics import MeterProvider
+# from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
+
+
+# from opentelemetry.sdk.trace import TracerProvider
+# from opentelemetry.sdk.trace.export import (BatchSpanProcessor)
+# from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 
 # Local
 import demo_pb2
@@ -33,6 +48,79 @@ import demo_pb2_grpc
 from grpc_health.v1 import health_pb2
 from grpc_health.v1 import health_pb2_grpc
 from logger import getJSONLogger
+
+# from metrics import (
+#     observable_counter_func,
+#     observable_up_down_counter_func,
+#     observable_gauge_func,
+# )
+
+# exporter = OTLPMetricExporter(insecure=True)
+meter = get_meter_provider().get_meter(__name__)
+
+## ---- Metrics
+### ------- Metrics stuff
+def observable_counter_func(options: CallbackOptions) -> Iterable[Observation]:
+    yield Observation(1, {})
+
+
+def observable_up_down_counter_func(
+    options: CallbackOptions,
+) -> Iterable[Observation]:
+    yield Observation(-10, {})
+
+
+def observable_gauge_func(options: CallbackOptions) -> Iterable[Observation]:
+    yield Observation(9, {})
+
+
+counter = meter.create_counter(
+    name="requests_counter",
+    description="number of requests",
+    unit="1"
+)
+# counter.add(1)
+
+# Async Counter
+# observable_counter = meter.create_observable_counter(
+#     "observable_counter",
+#     [observable_counter_func],
+# )
+
+# UpDownCounter
+updown_counter = meter.create_up_down_counter("updown_counter")
+updown_counter.add(1)
+updown_counter.add(-5)
+
+# Async UpDownCounter
+# observable_updown_counter = meter.create_observable_up_down_counter(
+#     "observable_updown_counter", [observable_up_down_counter_func]
+# )
+
+# Histogram
+histogram = meter.create_histogram(
+    name="request_size_bytes",
+    description="size of requests",
+    unit="byte"
+)    
+# histogram = meter.create_histogram("histogram")
+# histogram.record(99.9)
+
+# Async Gauge
+# gauge = meter.create_observable_gauge("gauge", [observable_gauge_func])
+
+staging_attributes = {"environment": "staging"}
+
+
+def set_metrics():
+
+    print("Setting metrics")
+    
+    counter.add(random.randint(0, 25), staging_attributes)
+    histogram.record(random.randint(0, 25), staging_attributes)
+    updown_counter.add(random.randint(-5, 25), staging_attributes)
+
+### ------- END Metrics stuff
 
 
 class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
@@ -56,7 +144,9 @@ class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
 
 
 def get_product_list(request_product_ids):
-    with tracer.start_as_current_span("get_product_list") as span:        
+    with tracer.start_as_current_span("get_product_list") as span:    
+        set_metrics()
+            
         max_responses = 5
         # fetch list of products from product catalog stub
         cat_response = product_catalog_stub.ListProducts(demo_pb2.Empty())        
@@ -85,7 +175,7 @@ def must_map_env(key: str):
 if __name__ == "__main__":
     logger = getJSONLogger('recommendationservice-server')
     tracer = trace.get_tracer_provider().get_tracer("recommendationservice")
-
+    
     port = must_map_env('RECOMMENDATION_SERVICE_PORT')
     catalog_addr = must_map_env('PRODUCT_CATALOG_SERVICE_ADDR')
     
