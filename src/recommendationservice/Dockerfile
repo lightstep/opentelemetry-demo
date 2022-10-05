@@ -30,5 +30,5 @@ RUN python -m grpc_tools.protoc -I=./proto/ --python_out=./ --grpc_python_out=./
 RUN chmod +x run.sh
 
 EXPOSE ${RECOMMENDATION_SERVICE_PORT}
-ENTRYPOINT ["./run.sh"]
-# ENTRYPOINT [ "opentelemetry-instrument", "python", "recommendation_server.py" ]
+# ENTRYPOINT ["./run.sh"]
+ENTRYPOINT [ "opentelemetry-instrument", "python", "recommendation_server.py" ]
