@@ -49,29 +49,29 @@ from grpc_health.v1 import health_pb2
 from grpc_health.v1 import health_pb2_grpc
 from logger import getJSONLogger
 
-# from metrics import (
-#     observable_counter_func,
-#     observable_up_down_counter_func,
-#     observable_gauge_func,
-# )
+from metrics import (
+    observable_counter_func,
+    observable_up_down_counter_func,
+    observable_gauge_func,
+)
 
 # exporter = OTLPMetricExporter(insecure=True)
 meter = get_meter_provider().get_meter(__name__)
 
 ## ---- Metrics
 ### ------- Metrics stuff
-def observable_counter_func(options: CallbackOptions) -> Iterable[Observation]:
-    yield Observation(1, {})
+# def observable_counter_func(options: CallbackOptions) -> Iterable[Observation]:
+#     yield Observation(1, {})
 
 
-def observable_up_down_counter_func(
-    options: CallbackOptions,
-) -> Iterable[Observation]:
-    yield Observation(-10, {})
+# def observable_up_down_counter_func(
+#     options: CallbackOptions,
+# ) -> Iterable[Observation]:
+#     yield Observation(-10, {})
 
 
-def observable_gauge_func(options: CallbackOptions) -> Iterable[Observation]:
-    yield Observation(9, {})
+# def observable_gauge_func(options: CallbackOptions) -> Iterable[Observation]:
+#     yield Observation(9, {})
 
 
 counter = meter.create_counter(
@@ -82,10 +82,10 @@ counter = meter.create_counter(
 # counter.add(1)
 
 # Async Counter
-# observable_counter = meter.create_observable_counter(
-#     "observable_counter",
-#     [observable_counter_func],
-# )
+observable_counter = meter.create_observable_counter(
+    "observable_counter",
+    [observable_counter_func],
+)
 
 # UpDownCounter
 updown_counter = meter.create_up_down_counter("updown_counter")
@@ -93,9 +93,9 @@ updown_counter.add(1)
 updown_counter.add(-5)
 
 # Async UpDownCounter
-# observable_updown_counter = meter.create_observable_up_down_counter(
-#     "observable_updown_counter", [observable_up_down_counter_func]
-# )
+observable_updown_counter = meter.create_observable_up_down_counter(
+    "observable_updown_counter", [observable_up_down_counter_func]
+)
 
 # Histogram
 histogram = meter.create_histogram(
@@ -107,7 +107,7 @@ histogram = meter.create_histogram(
 # histogram.record(99.9)
 
 # Async Gauge
-# gauge = meter.create_observable_gauge("gauge", [observable_gauge_func])
+gauge = meter.create_observable_gauge("gauge", [observable_gauge_func])
 
 staging_attributes = {"environment": "staging"}
 
