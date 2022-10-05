@@ -27,7 +27,6 @@ RUN opentelemetry-bootstrap -a install
 # add files into working directory
 RUN python -m pip install grpcio-tools==1.48.2
 RUN python -m grpc_tools.protoc -I=./proto/ --python_out=./ --grpc_python_out=./ ./proto/demo.proto
-RUN chmod +x run.sh
 
 EXPOSE ${RECOMMENDATION_SERVICE_PORT}
 ENTRYPOINT [ "opentelemetry-instrument", "python", "recommendation_server.py" ]
