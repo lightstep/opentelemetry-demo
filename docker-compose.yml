@@ -320,7 +320,6 @@ services:
       - PRODUCT_CATALOG_SERVICE_ADDR
       - OTEL_PYTHON_LOG_CORRELATION=true
       - OTEL_METRICS_EXPORTER=console,otlp
-      - OTEL_TRACES_EXPORTER=console,otlp
       - OTEL_EXPORTER_OTLP_ENDPOINT
       - OTEL_EXPORTER_OTLP_INSECURE=true
       - OTEL_SERVICE_NAME=recommendationservice
