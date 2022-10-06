@@ -62,10 +62,10 @@ def observable_gauge_func(options: CallbackOptions) -> Iterable[Observation]:
 
 def init_metrics(meter):
 
-    # Metrics init
-    counter = meter.create_counter(
+    # Requests counter
+    requests_counter = meter.create_counter(
         name="requests_counter",
-        description="number of requests",
+        description="number of current requests",
         unit="1"
     )
 
@@ -120,18 +120,18 @@ def init_metrics(meter):
         description="RAM usage"        
     )
     
-    staging_attributes = {"environment": "staging"}
+    attributes = {"app_name": "otel-demo"}
     
-    rs_metrics = {
-        "counter": counter,
+    rec_svc_metrics = {
+        "requests_counter": requests_counter,
         "observable_counter": observable_counter,
         "updown_counter": updown_counter,
         "observable_updown_counter": observable_updown_counter,
         "histogram": histogram,
         "gauge": gauge,
-        "staging_attributes": staging_attributes,
+        "attributes": attributes,
         "cpu_usage": cpu_usage,
         "ram_usage": ram_usage
     }
     
-    return rs_metrics
+    return rec_svc_metrics
