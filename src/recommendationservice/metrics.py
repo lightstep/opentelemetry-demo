@@ -21,6 +21,20 @@ def get_ram_usage_callback(options: CallbackOptions) -> Iterable[Observation]:
     
     return observations
 
+# CPU Time callback
+def cpu_time_callback(options: CallbackOptions) -> Iterable[Observation]:
+    observations = []
+    with open("/proc/stat") as procstat:
+        procstat.readline()  # skip the first line
+        for line in procstat:
+            if not line.startswith("cpu"): break
+            cpu, *states = line.split()
+            observations.append(Observation(int(states[0]) // 100, {"cpu": cpu, "state": "user"}))
+            observations.append(Observation(int(states[1]) // 100, {"cpu": cpu, "state": "nice"}))
+            observations.append(Observation(int(states[2]) // 100, {"cpu": cpu, "state": "system"}))
+            # ... other states
+    return observations
+
 # CPU usage
 def get_cpu_usage_callback(options: CallbackOptions) -> Iterable[Observation]:
     observations = []    
@@ -81,13 +95,22 @@ def init_metrics(meter):
     # Async Gauge
     gauge = meter.create_observable_gauge("gauge", [observable_gauge_func])
 
-    # CPU usage
-    cpu_usage = meter.create_observable_up_down_counter(
-        "cpu_percent",
-        callbacks=[get_cpu_usage_callback],
-        unit="%",
-        description="per-CPU usage"
+    # CPU time
+    cpu_time = meter.create_observable_counter(
+        "cpu_time",
+        callbacks=[cpu_time_callback],
+        unit="s",
+        description="CPU time"
     )
+
+    # CPU usage
+    cpu_usage = meter.create_observable_counter(
+        "cpu_usage",
+        callbacks=[get_cpu_usage_callback],
+        unit="s",
+        description="CPU usage"
+    )
+
     
     # RAM usage
     ram_usage = meter.create_observable_up_down_counter(
@@ -97,16 +120,6 @@ def init_metrics(meter):
         description="RAM usage"        
     )
     
-    
-    
-    # meter.register_valueobserver(
-    #     callback=get_cpu_usage_callback,
-    #     name="cpu_percent",
-    #     description="per-cpu usage",
-    #     unit="1",
-    #     value_type=float,
-    # )
-
     staging_attributes = {"environment": "staging"}
     
     rs_metrics = {
