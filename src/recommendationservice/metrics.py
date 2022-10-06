@@ -10,7 +10,7 @@ from opentelemetry.metrics import (
 )
 
 # RAM usage
-def get_ram_usage_callback(options: CallbackOptions) -> Iterable[Observation]:
+def ram_usage_callback(options: CallbackOptions) -> Iterable[Observation]:
     observations = []    
     ram_percent = psutil.virtual_memory().percent
     print(f"ram_percent: {ram_percent}")
@@ -36,7 +36,7 @@ def cpu_time_callback(options: CallbackOptions) -> Iterable[Observation]:
     return observations
 
 # CPU usage
-def get_cpu_usage_callback(options: CallbackOptions) -> Iterable[Observation]:
+def cpu_usage_callback(options: CallbackOptions) -> Iterable[Observation]:
     observations = []    
     for (number, percent) in enumerate(psutil.cpu_percent(percpu=True)):
         print(f"cpu_number: {number}, cpu_percent: {percent}")
@@ -46,17 +46,17 @@ def get_cpu_usage_callback(options: CallbackOptions) -> Iterable[Observation]:
         
     return observations
         
-def observable_counter_func(options: CallbackOptions) -> Iterable[Observation]:
+def observable_counter_callback(options: CallbackOptions) -> Iterable[Observation]:
     yield Observation(1, {})
 
 
-def observable_up_down_counter_func(
+def observable_up_down_counter_callback(
     options: CallbackOptions,
 ) -> Iterable[Observation]:
     yield Observation(-10, {})
 
 
-def observable_gauge_func(options: CallbackOptions) -> Iterable[Observation]:
+def observable_gauge_callback(options: CallbackOptions) -> Iterable[Observation]:
     yield Observation(9, {})
 
 
@@ -72,7 +72,7 @@ def init_metrics(meter):
     # Async Counter
     observable_counter = meter.create_observable_counter(
         "observable_counter",
-        [observable_counter_func],
+        [observable_counter_callback],
     )
 
     # UpDownCounter
@@ -82,7 +82,7 @@ def init_metrics(meter):
 
     # Async UpDownCounter
     observable_updown_counter = meter.create_observable_up_down_counter(
-        "observable_updown_counter", [observable_up_down_counter_func]
+        "observable_updown_counter", [observable_up_down_counter_callback]
     )
 
     # Histogram
@@ -93,29 +93,28 @@ def init_metrics(meter):
     )    
 
     # Async Gauge
-    gauge = meter.create_observable_gauge("gauge", [observable_gauge_func])
+    gauge = meter.create_observable_gauge("gauge", [observable_gauge_callback])
 
     # CPU time
-    cpu_time = meter.create_observable_counter(
-        "cpu_time",
-        callbacks=[cpu_time_callback],
-        unit="s",
-        description="CPU time"
-    )
+    # cpu_time = meter.create_observable_counter(
+    #     "cpu_time",
+    #     callbacks=[cpu_time_callback],
+    #     unit="s",
+    #     description="CPU time"
+    # )
 
     # CPU usage
     cpu_usage = meter.create_observable_counter(
         "cpu_usage",
-        callbacks=[get_cpu_usage_callback],
+        callbacks=[cpu_usage_callback],
         unit="s",
         description="CPU usage"
     )
 
-    
     # RAM usage
     ram_usage = meter.create_observable_up_down_counter(
         "ram_usage",
-        callbacks=[get_ram_usage_callback],
+        callbacks=[ram_usage_callback],
         unit="1",
         description="RAM usage"        
     )
