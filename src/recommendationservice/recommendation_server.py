@@ -43,13 +43,6 @@ from metrics import (
     init_metrics
 )
 
-def set_metrics():
-
-    logger.info(f"Settings metrics")
-    rec_svc_metrics["requests_counter"].add(1, rec_svc_metrics["attributes"])
-    # rec_svc_metrics["histogram"].record(random.randint(0, 25), rec_svc_metrics["staging_attributes"])
-    # rec_svc_metrics["updown_counter"].add(random.randint(-5, 25), rec_svc_metrics["staging_attributes"])
-
 class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
     def ListRecommendations(self, request, context):
         prod_list = get_product_list(request.product_ids)
@@ -59,6 +52,10 @@ class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
         # build and return response
         response = demo_pb2.ListRecommendationsResponse()
         response.product_ids.extend(prod_list)
+        
+        # Collect metrics on # requests to this service
+        rec_svc_metrics["list_recommendations_request_counter"].add(1, rec_svc_metrics["attributes"])
+        
         return response
 
     def Check(self, request, context):
@@ -72,7 +69,6 @@ class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
 
 def get_product_list(request_product_ids):
     with tracer.start_as_current_span("get_product_list") as span:    
-        set_metrics()
                             
         max_responses = 5
         # fetch list of products from product catalog stub

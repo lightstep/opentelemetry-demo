@@ -63,9 +63,9 @@ def observable_gauge_callback(options: CallbackOptions) -> Iterable[Observation]
 def init_metrics(meter):
 
     # Requests counter
-    requests_counter = meter.create_counter(
-        name="requests_counter",
-        description="number of current requests",
+    list_recommendations_request_counter = meter.create_counter(
+        name="app.products_recommended.request.count",
+        description="number of requests to RecommendationService.ListRecommendations",
         unit="1"
     )
 
@@ -119,10 +119,10 @@ def init_metrics(meter):
         description="RAM usage"        
     )
     
-    attributes = {"app_name": "otel-demo"}
+    attributes = {"application.name": "otel-demo"}
     
     rec_svc_metrics = {
-        "requests_counter": requests_counter,
+        "list_recommendations_request_counter": list_recommendations_request_counter,
         "observable_counter": observable_counter,
         "updown_counter": updown_counter,
         "observable_updown_counter": observable_updown_counter,
