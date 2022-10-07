@@ -1,0 +1,7 @@
+- Grab Lightstep Organization and Project Name
+- Create API Key
+- on `main.tf` change `organization` and `api_key ` according to your Lightstep account
+- run `terraform init`, it should say “Terraform initialized in an empty directory!”
+- run `terraform plan`
+- Answer the cli prompts and provide your project name from earlier and enter some test input for the kubernetes workloads aka deployments, for example: [{"workload":"test","namespace":"test"}]
+- Look at your dashboards 
