@@ -1,6 +1,6 @@
 
 resource "lightstep_metric_dashboard" "exported_dashboard" {
-  project_name = var.project
+  project_name   = var.lightstep_project
   dashboard_name = "oTel Demo App - Application Metrics"
 
   chart {
@@ -29,12 +29,12 @@ resource "lightstep_metric_dashboard" "exported_dashboard" {
     rank = "1"
     type = "timeseries"
 
-    query {
+    /* query {
       query_name          = "a"
       display             = "line"
       hidden              = false
 
-      metric              = "requests_counter"
+      metric              = "app.products_recommended.request.count"
       timeseries_operator = "rate"
 
 
@@ -43,8 +43,16 @@ resource "lightstep_metric_dashboard" "exported_dashboard" {
         keys = []
       }
 
-    }
+    } */
+    query {
+      query_name          = "a"
+      display             = "line"
+      hidden              = false
 
+      tql                 =  <<EOT
+      metric app.products_recommended.request.count | filter (instrumentation.name == "recommendationservice") | rate | group_by [], sum
+      EOT
+    }
   }
 
   chart {
