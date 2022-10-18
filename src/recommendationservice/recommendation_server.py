@@ -17,15 +17,12 @@
 # Python
 import os
 import random
-import time
 from concurrent import futures
 
 # Pip
 import grpc
-from opentelemetry import trace
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import (BatchSpanProcessor)
-from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry import trace, metrics
+
 
 # Local
 import demo_pb2
@@ -34,16 +31,23 @@ from grpc_health.v1 import health_pb2
 from grpc_health.v1 import health_pb2_grpc
 from logger import getJSONLogger
 
+from metrics import (
+    init_metrics
+)
 
 class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
     def ListRecommendations(self, request, context):
         prod_list = get_product_list(request.product_ids)
         span = trace.get_current_span()
         span.set_attribute("app.products_recommended.count", len(prod_list))
-        logger.info("[Recv ListRecommendations] product_ids={}".format(prod_list))
+        logger.info(f"[Recv ListRecommendations] product_ids={prod_list}")
         # build and return response
         response = demo_pb2.ListRecommendationsResponse()
         response.product_ids.extend(prod_list)
+
+        # Collect metrics for this service
+        rec_svc_metrics["app_recommendations_counter"].add(len(prod_list), {'recommendation.type': 'catalog'})
+
         return response
 
     def Check(self, request, context):
@@ -58,20 +62,29 @@ class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
 def get_product_list(request_product_ids):
     with tracer.start_as_current_span("get_product_list") as span:
         max_responses = 5
-        # fetch list of products from product catalog stub
+
+        # Formulate the list of characters to list of strings
+        request_product_ids_str = ''.join(request_product_ids)
+        request_product_ids = request_product_ids_str.split(',')
+
+        # Fetch list of products from product catalog stub
         cat_response = product_catalog_stub.ListProducts(demo_pb2.Empty())
         product_ids = [x.id for x in cat_response.products]
         span.set_attribute("app.products.count", len(product_ids))
 
+        # Create a filtered list of products excluding the products received as input
         filtered_products = list(set(product_ids) - set(request_product_ids))
         num_products = len(filtered_products)
         span.set_attribute("app.filtered_products.count", num_products)
-
         num_return = min(max_responses, num_products)
-        # sample list of indicies to return
+
+        # Sample list of indicies to return
         indices = random.sample(range(num_products), num_return)
-        # fetch product ids from indices
+        # Fetch product ids from indices
         prod_list = [filtered_products[i] for i in indices]
+
+        span.set_attribute("app.filtered_products.list", prod_list)
+
         return prod_list
 
 
@@ -82,11 +95,10 @@ def must_map_env(key: str):
     return value
 
 if __name__ == "__main__":
-    logger = getJSONLogger('recommendationservice-server')
-    tracer_provider = TracerProvider()
-    trace.set_tracer_provider(tracer_provider)
-    tracer_provider.add_span_processor(BatchSpanProcessor(OTLPSpanExporter()))
-    tracer = trace.get_tracer("recommendationservice")
+    # Initialize Traces and Metrics
+    tracer = trace.get_tracer_provider().get_tracer("recommendationservice")
+    meter = metrics.get_meter_provider().get_meter("recommendationservice")
+    rec_svc_metrics = init_metrics(meter)
 
     port = must_map_env('RECOMMENDATION_SERVICE_PORT')
     catalog_addr = must_map_env('PRODUCT_CATALOG_SERVICE_ADDR')
@@ -94,16 +106,19 @@ if __name__ == "__main__":
     channel = grpc.insecure_channel(catalog_addr)
     product_catalog_stub = demo_pb2_grpc.ProductCatalogServiceStub(channel)
 
-    # create gRPC server
+    # Create gRPC server
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
 
-    # add class to gRPC server
+    # Add class to gRPC server
     service = RecommendationService()
     demo_pb2_grpc.add_RecommendationServiceServicer_to_server(service, server)
     health_pb2_grpc.add_HealthServicer_to_server(service, server)
 
-    # start server
-    logger.info("RecommendationService listening on port: " + port)
-    server.add_insecure_port('[::]:' + port)
+    # Start logger
+    logger = getJSONLogger('recommendationservice-server')
+    logger.info(f"RecommendationService listening on port: {port}")
+
+    # Start server
+    server.add_insecure_port(f'[::]:{port}')
     server.start()
     server.wait_for_termination()
