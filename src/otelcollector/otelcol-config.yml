@@ -5,11 +5,8 @@ receivers:
       http:
         cors:
           allowed_origins:
-            - "http://localhost:8080"
-  otlp/spanmetrics:
-    protocols:
-      grpc:
-        endpoint: "localhost:65535"
+            - "http://*"
+            - "https://*"
 
 exporters:
   otlp:
@@ -19,7 +16,6 @@ exporters:
   logging:
   prometheus:
     endpoint: "otelcol:9464"
-
 
 processors:
   batch:
@@ -36,6 +32,3 @@ service:
       receivers: [otlp]
       processors: [batch]
       exporters: [prometheus, logging]
-    metrics/spanmetrics:
-      receivers: [ otlp/spanmetrics ]
-      exporters: [ prometheus, logging ]

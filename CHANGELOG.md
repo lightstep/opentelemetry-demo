@@ -124,3 +124,23 @@ significant modifications will be credited to OpenTelemetry Authors.
 ([#455](https://github.com/open-telemetry/opentelemetry-demo/pull/455))
 * Update cartservice Dockerfile to support ARM64
 ([#439](https://github.com/open-telemetry/opentelemetry-demo/pull/439))
+* Update shippingservice to add resource data to spans
+([#504](https://github.com/open-telemetry/opentelemetry-demo/pull/504))
+* Add Envoy as reverse proxy for all user-facing services
+([#508](https://github.com/open-telemetry/opentelemetry-demo/pull/508))
+* Envoy: Grafana, Load Generator, Jaeger exposed.
+([#513](https://github.com/open-telemetry/opentelemetry-demo/pull/513))
+* Added frontend instrumentation exporter custom url
+([#512](https://github.com/open-telemetry/opentelemetry-demo/pull/512))
+* Replaced PHP-CLI to PHP-Apache for a more realistic service
+([#563](https://github.com/open-telemetry/opentelemetry-demo/pull/563))
+* Optimize currencyservice build time with parallel build jobs
+([#569](https://github.com/open-telemetry/opentelemetry-demo/pull/569))
+* Optimize GitHub Builds and fix broken emulation of featureflag
+([#536](https://github.com/open-telemetry/opentelemetry-demo/pull/536))
+* Add basic metrics support for payment service
+([#583](https://github.com/open-telemetry/opentelemetry-demo/pull/583))
+* Change ZipCode data type from int to string
+([#587](https://github.com/open-telemetry/opentelemetry-demo/pull/587))
+* Pass product's `categories` as an input for the Ad service
+([#600](https://github.com/open-telemetry/opentelemetry-demo/pull/600))

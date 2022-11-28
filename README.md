@@ -6,196 +6,90 @@
 [![Downloads](https://img.shields.io/docker/pulls/otel/demo)](https://hub.docker.com/r/otel/demo)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg?color=red)](https://github.com/open-telemetry/opentelemetry-demo/blob/main/LICENSE)
 
-## Under Construction
+## Welcome to the OpenTelemetry Astronomy Shop Demo
 
-This repo is a work in progress. If you'd like to help, check out our
-[contributing guidance](#contributing).
+This repository contains the OpenTelemetry Astronomy Shop, a microservice-based
+distributed system intended to illustrate the implementation of OpenTelemetry in
+a near real-world environment.
 
-## Getting Started
+Our goals are threefold:
+
+- Provide a realistic example of a distributed system that can be used to
+  demonstrate OpenTelemetry instrumentation and observability.
+- Build a base for vendors, tooling authors, and others to extend and
+  demonstrate their OpenTelemetry integrations.
+- Create a living example for OpenTelemetry contributors to use for testing new
+  versions of the API, SDK, and other components or enhancements.
+
+We've already made [huge
+progress](https://github.com/open-telemetry/opentelemetry-demo/blob/main/CHANGELOG.md),
+and development is ongoing. We hope to represent the full feature set of
+OpenTelemetry across its languages in the future.
+
+If you'd like to help (**which we would love**), check out our [contributing
+guidance](./CONTRIBUTING.md).
+
+If you'd like to extend this demo or maintain a fork of it, please read our
+[fork guidance](./docs/forking.md).
+
+## Quick start
+
+You can be up and running with the demo in a few minutes. Check out the docs for
+your preferred deployment method:
 
 - [Docker](./docs/docker_deployment.md)
 - [Kubernetes](./docs/kubernetes_deployment.md)
 
 ## Documentation
 
-- [Demo Screenshots](./docs/demo_screenshots.md)
-- [Feature Flags](./docs/feature_flags.md)
-- [Manual Span Attributes](./docs/manual_span_attributes.md)
-- [Metric Feature Coverage by Service](./docs/metric_service_features.md)
-- [Requirements](./docs/requirements/README.md)
-- [Service Roles](./docs/service_table.md)
-- [Trace Feature Coverage by Service](./docs/trace_service_features.md)
+We have detailed documentation available in the [docs](./docs/) folder. If you're
+curious about a specific feature the docs [README](./docs/README.md) can point
+you in the right direction.
 
-## Architecture
+## Demos featuring the Astronomy Shop
 
-**Online Boutique** is composed of microservices written in different programming
-languages that talk to each other over gRPC and HTTP; and a load generator which
-uses [Locust](https://locust.io/) to fake user traffic.
+We welcome any vendor to fork the project to demonstrate their services and
+adding a link below. The community is committed to maintaining the project and
+keeping it up to date for you.
 
-```mermaid
-graph TD
-
-subgraph Service Diagram
-adservice(Ad Service):::java
-cache[(Cache<br/>&#40redis&#41)]
-cartservice(Cart Service):::dotnet
-checkoutservice(Checkout Service):::golang
-currencyservice(Currency Service):::cpp
-emailservice(Email Service):::ruby
-frontend(Frontend):::javascript
-loadgenerator([Load Generator]):::python
-paymentservice(Payment Service):::javascript
-productcatalogservice(Product Catalog Service):::golang
-quoteservice(Quote Service):::php
-recommendationservice(Recommendation Service):::python
-shippingservice(Shipping Service):::rust
-featureflagservice(Feature Flag Service):::erlang
-featureflagstore[(Feature Flag Store<br/>&#40PostgreSQL DB&#41)]
-
-Internet -->|HTTP| frontend
-loadgenerator -->|HTTP| frontend
-
-checkoutservice --->|gRPC| cartservice --> cache
-checkoutservice --->|gRPC| productcatalogservice
-checkoutservice --->|gRPC| currencyservice
-checkoutservice --->|HTTP| emailservice
-checkoutservice --->|gRPC| paymentservice
-checkoutservice -->|gRPC| shippingservice
-
-frontend -->|gRPC| adservice
-frontend -->|gRPC| cartservice
-frontend -->|gRPC| productcatalogservice
-frontend -->|gRPC| checkoutservice
-frontend -->|gRPC| currencyservice
-frontend -->|gRPC| recommendationservice -->|gRPC| productcatalogservice
-frontend -->|gRPC| shippingservice -->|HTTP| quoteservice
-
-productcatalogservice -->|gRPC| featureflagservice
-
-shippingservice -->|gRPC| featureflagservice
-
-featureflagservice --> featureflagstore
-
-end
-classDef java fill:#b07219,color:white;
-classDef dotnet fill:#178600,color:white;
-classDef golang fill:#00add8,color:black;
-classDef cpp fill:#f34b7d,color:white;
-classDef ruby fill:#701516,color:white;
-classDef python fill:#3572A5,color:white;
-classDef javascript fill:#f1e05a,color:black;
-classDef rust fill:#dea584,color:black;
-classDef erlang fill:#b83998,color:white;
-classDef php fill:#4f5d95,color:white;
-```
-
-```mermaid
-graph TD
-subgraph Service Legend
-  javasvc(Java):::java
-  dotnetsvc(.NET):::dotnet
-  golangsvc(Go):::golang
-  cppsvc(C++):::cpp
-  rubysvc(Ruby):::ruby
-  pythonsvc(Python):::python
-  javascriptsvc(JavaScript):::javascript
-  rustsvc(Rust):::rust
-  erlangsvc(Erlang/Elixir):::erlang
-  phpsvc(PHP):::php
-end
-
-classDef java fill:#b07219,color:white;
-classDef dotnet fill:#178600,color:white;
-classDef golang fill:#00add8,color:black;
-classDef cpp fill:#f34b7d,color:white;
-classDef ruby fill:#701516,color:white;
-classDef python fill:#3572A5,color:white;
-classDef javascript fill:#f1e05a,color:black;
-classDef rust fill:#dea584,color:black;
-classDef erlang fill:#b83998,color:white;
-classDef php fill:#4f5d95,color:white;
-```
-
-Find the **Protocol Buffer Definitions** in the `/pb/` directory.
-
-## Features
-
-- **[Kubernetes](https://kubernetes.io)**: the app is designed to run on
-  Kubernetes (both locally , as well as on the cloud).
-- **[Docker](https://docs.docker.com)**: this forked sample can also be executed
-  only with Docker.
-- **[gRPC](https://grpc.io)**: microservices use a high volume of gRPC calls to
-  communicate to each other.
-- **[OpenTelemetry Traces](https://opentelemetry.io)**: all services are
-  instrumented using OpenTelemetry available instrumentation libraries.
-- **[OpenTelemetry
-  Collector](https://opentelemetry.io/docs/collector/getting-started)**: all
-  services are instrumented and sending the generated traces to the
-  OpenTelemetry Collector via gRPC. The received traces are then exported to the
-  logs and to Jaeger.
-- **[Jaeger](https://www.jaegertracing.io)**: all generated traces are being
-  sent to Jaeger.
-- **Synthetic Load Generation**: the application demo comes with a background
-  job that creates realistic usage patterns on the website using
-  [Locust](https://locust.io/) load generator.
-- **[Prometheus](https://prometheus.io/)**: all generated metrics are being
-  sent to Prometheus.
-- **[Grafana](https://grafana.com/)**: all metric dashboards are stored in Grafana.
-
-## Tests
-
-Currently, the repository includes E2E tests for both the frontend and backend services.
-For the Frontend we are using [Cypress](https://www.cypress.io/) execute the
-different flows in the webstore.
-While the backend services use [AVA](https://avajs.dev) as the main testing framework.
-
-To run the test you can simple run `make run-tests` at the root directory.
-
-In case you need to run a specific suite of tests you can execute
-`docker compose run frontendTests` for the frontend tests or
-`docker compose run integrationTests` for the backend tests.
-
-## Demos featuring Online Boutique
-
+- [AppDynamics](https://www.appdynamics.com/blog/cloud/how-to-observe-opentelemetry-demo-app-in-appdynamics-cloud/)
+- [Aspecto](https://github.com/aspecto-io/opentelemetry-demo)
 - [Datadog](https://github.com/DataDog/opentelemetry-demo)
 - [Dynatrace](https://www.dynatrace.com/news/blog/opentelemetry-demo-application-with-dynatrace/)
+- [Helios](https://otelsandbox.gethelios.dev)
 - [Honeycomb.io](https://github.com/honeycombio/opentelemetry-demo)
 - [Lightstep](https://github.com/lightstep/opentelemetry-demo)
 - [New Relic](https://github.com/newrelic/opentelemetry-demo)
-
-See [Forking](./docs/forking.md) for more information about creating your own fork.
+- [Uptrace](https://github.com/uptrace/uptrace/tree/master/example/opentelemetry-demo)
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md)
+To get involved with the project see our [CONTRIBUTING](CONTRIBUTING.md)
+documentation. Our [SIG Calls](CONTRIBUTING.md#join-a-sig-call) are Mondays at
+8:15 AM PST and anyone is welcome.
 
-We meet weekly Monday's at 8:15 AM PT. The meeting is subject to change
-depending on contributors' availability. Check the [OpenTelemetry community
-calendar](https://calendar.google.com/calendar/embed?src=google.com_b79e3e90j7bbsa2n2p5an5lf60%40group.calendar.google.com)
-for specific dates and Zoom meeting links.
-
-Meeting notes are available as a public [Google
-doc](https://docs.google.com/document/d/16f-JOjKzLgWxULRxY8TmpM_FjlI1sthvKurnqFz9x98/edit).
-For edit access, get in touch on
-[Slack](https://cloud-native.slack.com/archives/C03B4CWV4DA).
+## Project leadership
 
 [Maintainers](https://github.com/open-telemetry/community/blob/main/community-membership.md#maintainer)
 ([@open-telemetry/demo-maintainers](https://github.com/orgs/open-telemetry/teams/demo-maintainers)):
 
 - [Austin Parker](https://github.com/austinlparker), Lightstep
-- [Carter Socha](https://github.com/cartersocha), Microsoft
-- [Morgan McLean](https://github.com/mtwo), Splunk
+- [Carter Socha](https://github.com/cartersocha), Lightstep
+- [Juliano Costa](https://github.com/julianocosta89), Dynatrace
 - [Pierre Tessier](https://github.com/puckpuck), Honeycomb
 
 [Approvers](https://github.com/open-telemetry/community/blob/main/community-membership.md#approver)
 ([@open-telemetry/demo-approvers](https://github.com/orgs/open-telemetry/teams/demo-approvers)):
 
-- [Juliano Costa](https://github.com/julianocosta89), Dynatrace
 - [Michael Maxwell](https://github.com/mic-max), Microsoft
 - [Mikko Viitanen](https://github.com/mviitane), Dynatrace
 - [Penghan Wang](https://github.com/wph95), AppDynamics
 - [Reiley Yang](https://github.com/reyang), Microsoft
 - [Ziqi Zhao](https://github.com/fatsheep9146), Alibaba
+
+Emeritus:
+
+- [Morgan McLean](https://github.com/mtwo)
 
 ### Thanks to all the people who have contributed
 

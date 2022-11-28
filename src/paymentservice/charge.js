@@ -12,32 +12,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Npm
 const {context, propagation, trace} = require('@opentelemetry/api');
+const { metrics } = require('@opentelemetry/api-metrics');
 const cardValidator = require('simple-card-validator');
-const pino = require('pino');
 const { v4: uuidv4 } = require('uuid');
 
-// Setup
-const logger = pino();
+const logger = require('./logger');
 const tracer = trace.getTracer('paymentservice');
+const meter = metrics.getMeter('paymentservice');
+const transactionsCounter = meter.createCounter('app.payment.transactions')
 
-// Functions
 module.exports.charge = request => {
   const span = tracer.startSpan('charge');
 
-  const { creditCardNumber: number,
+  const {
+    creditCardNumber: number,
     creditCardExpirationYear: year,
     creditCardExpirationMonth: month
   } = request.creditCard;
-  const { units, nanos, currencyCode } = request.amount;
   const currentMonth = new Date().getMonth() + 1;
   const currentYear = new Date().getFullYear();
   const lastFourDigits = number.substr(-4);
   const transactionId = uuidv4();
 
   const card = cardValidator(number);
-  const {card_type: cardType, valid } = card.getCardDetails();
+  const { card_type: cardType, valid } = card.getCardDetails();
 
   span.setAttributes({
     'app.payment.card_type': cardType,
@@ -51,14 +50,14 @@ module.exports.charge = request => {
   if (!['visa', 'mastercard'].includes(cardType)) {
     throw new Error(`Sorry, we cannot process ${cardType} credit cards. Only VISA or MasterCard is accepted.`);
   }
-  
+
   if ((currentYear * 12 + currentMonth) > (year * 12 + month)) {
     throw new Error(`The credit card (ending ${lastFourDigits}) expired on ${month}/${year}.`);
   }
 
   // check baggage for synthetic_request=true, and add charged attribute accordingly
   const baggage = propagation.getBaggage(context.active());
-  if (baggage && baggage.getEntry("synthetic_request") && baggage.getEntry("synthetic_request").value == "true") {
+  if (baggage && baggage.getEntry("synthetic_request") && baggage.getEntry("synthetic_request").value === "true") {
     span.setAttribute('app.payment.charged', false);
   } else {
     span.setAttribute('app.payment.charged', true);
@@ -66,7 +65,8 @@ module.exports.charge = request => {
 
   span.end();
 
-  logger.info(`Transaction ${transactionId}: ${cardType} ending ${lastFourDigits} | Amount: ${units}.${nanos} ${currencyCode}`);
-
+  const { units, nanos, currencyCode } = request.amount;
+  logger.info({transactionId, cardType, lastFourDigits, amount: { units, nanos, currencyCode }}, "Transaction complete.");
+  transactionsCounter.add(1, {"app.payment.currency": currencyCode})
   return { transactionId }
 }

@@ -4,9 +4,9 @@ The frontend is responsible to provide a UI for users, as well
 as an API leveraged by the UI or other clients. The application is based on
 [Next.JS](https://nextjs.org/) to provide a React web-based UI and API routes.
 
-[Front End source](../../src/frontend/)
+[Frontend source](../../src/frontend/)
 
-## SDK initialization
+## Server Instrumentation
 
 It is recommended to use a Node required module when starting your NodeJS
 application to initialize the SDK and auto-instrumentation. When initializing
@@ -75,7 +75,6 @@ application context.
             "app.synthetic_request": true,
             [SemanticAttributes.HTTP_TARGET]: target,
             [SemanticAttributes.HTTP_STATUS_CODE]: response.statusCode,
-            [SemanticAttributes.HTTP_ROUTE]: url,
             [SemanticAttributes.HTTP_METHOD]: method,
             [SemanticAttributes.HTTP_USER_AGENT]: headers['user-agent'] || '',
             [SemanticAttributes.HTTP_URL]: `${headers.host}${url}`,

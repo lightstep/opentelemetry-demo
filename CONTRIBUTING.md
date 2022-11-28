@@ -6,6 +6,18 @@ Before you start - see OpenTelemetry general
 [contributing](https://github.com/open-telemetry/community/blob/main/CONTRIBUTING.md)
 requirements and recommendations.
 
+## Join a SIG Call
+
+We meet weekly Monday's at 8:15 AM PT. The meeting is subject to change
+depending on contributors' availability. Check the [OpenTelemetry community
+calendar](https://calendar.google.com/calendar/embed?src=google.com_b79e3e90j7bbsa2n2p5an5lf60%40group.calendar.google.com)
+for specific dates and Zoom meeting links.
+
+Meeting notes are available as a public [Google
+doc](https://docs.google.com/document/d/16f-JOjKzLgWxULRxY8TmpM_FjlI1sthvKurnqFz9x98/edit).
+For edit access, get in touch on
+[Slack](https://cloud-native.slack.com/archives/C03B4CWV4DA).
+
 ## Sign the CLA
 
 Before you can contribute, you will need to sign the [Contributor License
@@ -80,11 +92,17 @@ docker compose up -d
 Once the images are built and containers are started you can access:
 
 - Webstore: <http://localhost:8080/>
-- Jaeger: <http://localhost:16686/>
-- Prometheus: <http://localhost:9090/>
-- Grafana: <http://localhost:3000/>
-- Feature Flags UI: <http://localhost:8081/>
-- Load Generator UI: <http://localhost:8089/>
+- Jaeger: <http://localhost:8080/jaeger/ui/>
+- Grafana: <http://localhost:8080/grafana/>
+- Feature Flags UI: <http://localhost:8080/feature/>
+- Load Generator UI: <http://localhost:8080/loadgen//>
+
+### Review the Documentation
+
+The Demo team is committed to keeping the demo up to date. That means the
+documentation as well as the code. When making changes to any service or feature
+remember to find the related docs and update those as well. Most (but not all)
+documentation can be found the [docs](./docs/) folder.
 
 ## Create Your First Pull Request
 
@@ -94,6 +112,10 @@ Everyone is welcome to contribute code to `opentelemetry-demo` via
 GitHub pull requests (PRs).
 
 To create a new PR, fork the project in GitHub and clone the upstream repo:
+
+> **Note**
+> Please fork to a personal GitHub account rather than a corporate/enterprise
+> one so maintainers can push commits to your branch.
 
 ```sh
 git clone https://github.com/open-telemetry/opentelemetry-demo.git
@@ -150,7 +172,9 @@ A PR is considered to be **ready to merge** when:
 - Major feedbacks are resolved.
 - It has been open for review for at least one working day. This gives people
   reasonable time to review.
-- Trivial change (typo, cosmetic, doc, etc.) doesn't have to wait for one day.
+- The [documentation](./docs/) and [Changelog](./CHANGELOG.md) have been updated
+  to reflect the new changes.
+- Trivial changes (typo, cosmetic, doc, etc.) don't have to wait for one day.
 
 Any Maintainer can merge the PR once it is **ready to merge**. Note, that some
 PRs may not be merged immediately if the repo is in the process of a release and

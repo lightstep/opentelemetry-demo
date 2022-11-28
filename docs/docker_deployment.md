@@ -30,6 +30,9 @@ cd opentelemetry-demo/
 docker compose up --no-build
 ```
 
+> **Note:** If you're running on Apple Silicon, please run `docker compose
+> build` in order to create local images vs. pulling them from the repository.
+
 **Note:** The `--no-build` flag is used to fetch released docker images from
 [ghcr](http://ghcr.io/open-telemetry/demo) instead of building from source.
 Removing the `--no-build` command line option will rebuild all images from
@@ -40,11 +43,10 @@ source. It may take more than 20 minutes to build if the flag is omitted.
 Once the images are built and containers are started you can access:
 
 - Webstore: <http://localhost:8080/>
-- Jaeger: <http://localhost:16686/>
-- Prometheus: <http://localhost:9090/>
-- Grafana: <http://localhost:3000/>
-- Feature Flags UI: <http://localhost:8081/>
-- Load Generator UI: <http://localhost:8089/>
+- Grafana: <http://localhost:8080/grafana/>
+- Feature Flags UI: <http://localhost:8080/feature/>
+- Load Generator UI: <http://localhost:8080/loadgen/>
+- Jaeger UI: <http://localhost:8080/jaeger/ui/>
 
 ## Bring your own backend
 
