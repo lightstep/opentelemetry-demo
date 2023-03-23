@@ -61,12 +61,22 @@ jobs:
           - file: ./src/recommendationservice/Dockerfile
             tag_suffix: recommendationservice
             context: ./
+          - file: ./src/kafka/Dockerfile
+            tag_suffix: kafka
+            context: ./
+          - file: ./src/accountingservice/Dockerfile
+            tag_suffix: accountingservice
+            context: ./
+          - file: ./src/frauddetectionservice/Dockerfile
+            tag_suffix: frauddetectionservice
+            context: ./
           - file: ./src/frontend/Dockerfile.cypress
             tag_suffix: frontend-tests
             context: ./
           - file: ./test/Dockerfile
             tag_suffix: integrationTests
             context: ./
+
     steps:
       - uses: actions/checkout@v3
         with:
@@ -98,11 +108,11 @@ jobs:
               max-parallelism = 2
 
       - name: Matrix Build and push demo images
-        uses: docker/build-push-action@v3.2.0
+        uses: docker/build-push-action@v3.3.0
         with:
           context: ${{ matrix.file_tag.context }}
           file: ${{ matrix.file_tag.file }}
-          platforms: linux/amd64
+          platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
           tags: |
             ${{ env.DOCKERHUB_REPO }}:${{ env.RELEASE_VERSION || 'pr' }}-${{matrix.file_tag.tag_suffix }}

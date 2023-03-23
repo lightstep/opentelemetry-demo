@@ -1,3 +1,17 @@
+// Copyright The OpenTelemetry Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 use core::fmt;
 use std::{collections::HashMap, env};
 
@@ -6,6 +20,8 @@ use opentelemetry::global;
 use opentelemetry::{trace::get_active_span, Context, KeyValue};
 use opentelemetry_http::HeaderInjector;
 use reqwest::header::HeaderMap;
+use reqwest_middleware::ClientBuilder;
+use reqwest_tracing::{TracingMiddleware, SpanBackendWithUrl};
 
 use reqwest::Method;
 
@@ -48,7 +64,9 @@ async fn request_quote(count: u32) -> Result<f64, Box<dyn std::error::Error>> {
     let mut reqbody = HashMap::new();
     reqbody.insert("numberOfItems", count);
 
-    let client = reqwest::Client::new();
+    let client = ClientBuilder::new(reqwest::Client::new())
+        .with(TracingMiddleware::<SpanBackendWithUrl>::new())
+        .build();
 
     let req = client.request(Method::POST, quote_service_addr);
 
